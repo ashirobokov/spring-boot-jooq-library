@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 @ToString
 public class AuthorBookList {
+    Long authorId;
     String authorName;
     List<Book> books;
 }

@@ -20,14 +20,11 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     public Author saveAuthor(Author author) {
-        log.info(".... LibraryService.saveAuthor .. {}", author);
+        log.info("LibraryService/saveAuthor .. Author {} {}", author.getFirstName(), author.getLastName());
         Author savedAuthor = libraryRepository.insertAuthor(author);
 
-        if (savedAuthor != null) {
-            // also some processing can be done here
-            log.info(".... LibraryService.saveAuthor .. savedAuthor {}", savedAuthor);
-        } else {
-            log.error(".... ERROR LibraryService.saveAuthor .. saved Author value is null");
+        if (savedAuthor == null) {
+            log.error("LibraryService/saveAuthor .. ERROR to save Author {} {}", author.getFirstName(), author.getLastName());
         }
 
         return savedAuthor;
@@ -35,11 +32,11 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     public Long removeAuthor(Long id) {
-        log.info("LibraryService/removeAuthor id = {}", id);
+        log.info("LibraryService/removeAuthor .. id = {}", id);
 
         Long authorId = libraryRepository.deleteAuthor(id);
         if (authorId < 0) {
-            log.error("ERROR LibraryService/removeAuthor error ");
+            log.error("ERROR LibraryService/removeAuthor .. ERROR when removing Author with id = {}", id);
             return -1L;
         }
 
@@ -48,11 +45,11 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     public List<Author> findAllAuthors() {
-        log.info(".... LibraryService.findAllAuthors");
+        log.info("LibraryService/findAllAuthors");
         List<Author> authors = libraryRepository.selectAllAuthors();
 
         if (null == authors) {
-            log.error(".... ERROR LibraryService.findAllAuthors .. Author's list is null");
+            log.error("LibraryService/findAllAuthors .. ERROR ");
         }
 
         return authors;
@@ -71,20 +68,20 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public Author findAuthorByLastName(String lastName) {
-        log.info("LibraryService/findAuthorByLastName last name = {}", lastName);
-        Author author = libraryRepository.selectAuthorByLastName(lastName);
+    public List<Author> findAuthorByLastName(String lastName) {
+        log.info("LibraryService/findAuthorByLastName .. last name = {}", lastName);
+        List<Author> authors = libraryRepository.selectAuthorByLastName(lastName);
 
-        if (author == null) {
+        if (authors == null) {
             log.error("LibraryService/findAuthorByLastName .. ERROR when searching for the author with last name = {}", lastName);
         }
 
-        return author;
+        return authors;
     }
 
     @Override
     public Author findAuthorById(Long authorId) {
-        log.info("LibraryService/findAuthorById id = {}", authorId);
+        log.info("LibraryService/findAuthorById .. id = {}", authorId);
         Author author = libraryRepository.selectAuthorById(authorId);
 
         if (author == null) {
@@ -95,19 +92,19 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public Book saveBook(String authorName, String title) {
-        log.info("LibraryService/saveBook author={}, title={}", authorName, title);
-        Author author = findAuthorByLastName(authorName);
+    public Book saveBook(Long authorId, String title) {
+        log.info("LibraryService/saveBook .. author id={}, title={}", authorId, title);
+        Author author = findAuthorById(authorId);
 
         if (author == null) {
-            log.error("LibraryService/saveBook .. ERROR Author not found");
+            log.error("LibraryService/saveBook .. ERROR Author id = {} not found", authorId);
             return null;
         }
 
         Book book = libraryRepository.insertBook(author, title);
 
         if (book == null) {
-            log.error("LibraryService/saveBook .. ERROR to save Book with title={}", title);
+            log.error("LibraryService/saveBook .. ERROR to save Book with title '{}'", title);
         }
 
         return book;
@@ -127,20 +124,20 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public Book findBookByTitle(String title) {
-        log.info("LibraryService/findBookByTitle title = \"{}\"", title);
-        Book book = libraryRepository.selectBookByTitle(title);
+    public List<Book> findBookByTitle(String title) {
+        log.info("LibraryService/findBookByTitle .. title = {}", title);
+        List<Book> books = libraryRepository.selectBookByTitle(title);
 
-        if (book == null) {
-            log.error("ERROR LibraryService/findBookByTitle .. book with title \"{}\" not found", title);
+        if (books == null) {
+            log.error("ERROR LibraryService/findBookByTitle .. book with title '{}' not found", title);
         }
 
-        return book;
+        return books;
     }
 
     @Override
     public Book findBookById(Long id) {
-        log.info("LibraryService/findBookById id = {}", id);
+        log.info("LibraryService/findBookById .. id = {}", id);
         Book book = libraryRepository.selectBookById(id);
 
         if (book == null) {
@@ -151,24 +148,25 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public AuthorBookList findBooksByAuthor(String lastName) {
-        log.info(".... LibraryService.findBooksByAuthor .. lastName = \"{}\"", lastName);
-        Author author = libraryRepository.selectAuthorByLastName(lastName);
+    public AuthorBookList findBooksByAuthor(Long authorId) {
+        log.info("LibraryService/findBooksByAuthor .. Author id = {}", authorId);
+        Author author = libraryRepository.selectAuthorById(authorId);
+
         if (null == author) {
-            log.error(" ERROR: LibraryService.findBooksByAuthor : не найден писатель с фамилией \"{}\"", lastName);
+            log.error(" ERROR LibraryService/findBooksByAuthor : Author id = {} not found", authorId);
             return null;
         }
 
         List<Book> books = new ArrayList<>();
         books = libraryRepository.selectBooksByAuthor(author);
-        log.info("Список книг для автора {} = {}", lastName, books);
+        log.info("Список книг для автора {} = {}", authorId, books);
 
         if (null == books) {
-            log.error(" ERROR: LibraryService.findBooksByAuthor : не найден список книг для писателя с фамилией \"{}\"", lastName);
+            log.error("ERROR LibraryService/findBooksByAuthor .. book list of Author id = {} not found", authorId);
             return null;
         }
 
-        return new AuthorBookList(author.getLastName(), books);
+        return new AuthorBookList(author.getId(), author.getLastName(), books);
     }
 
     @Override

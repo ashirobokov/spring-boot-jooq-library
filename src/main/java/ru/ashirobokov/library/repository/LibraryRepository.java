@@ -27,15 +27,20 @@ public class LibraryRepository {
 
     public List<Author> selectAllAuthors() {
         try {
-            return dsl.selectFrom(AUTHORS).fetchInto(Author.class);
+            log.info("LibraryRepository/selectAllAuthors");
+
+            return dsl.selectFrom(AUTHORS)
+                    .fetchInto(Author.class);
         } catch (Exception e) {
-            log.error("...... ERROR Repository : selectAllAuthors : ошибка при получении списка писателей из БД ");
+            log.error("LibraryRepository/selectAllAuthors error", e);
             return null;
         }
     }
 
     public Author insertAuthor(Author author) {
         try {
+            log.info("LibraryRepository/insert .. Author {} {}", author.getFirstName(), author.getLastName());
+
             return dsl.insertInto(AUTHORS)
                     .set(AUTHORS.FIRST_NAME, author.getFirstName())
                     .set(AUTHORS.LAST_NAME, author.getLastName())
@@ -43,7 +48,7 @@ public class LibraryRepository {
                     .fetchOne()
                     .into(Author.class);
         } catch (Exception e) {
-            log.error("...... ERROR Repository : insertAuthor : ошибка сохранения Писателя в БД ");
+            log.error("LibraryRepository/insertAuthor error", e);
             return null;
         }
     }
@@ -51,7 +56,7 @@ public class LibraryRepository {
     @Transactional
     public Long deleteAuthor(Long authorId) {
         try {
-            log.info("LibraryRepository/delete Author id = {}", authorId);
+            log.info("LibraryRepository/delete .. Author id = {}", authorId);
 /*
                 Result<Record1<Long>> result = dsl.select(AUTHORS_BOOKS.BOOK_ID)
                         .from(AUTHORS_BOOKS)
@@ -93,61 +98,37 @@ public class LibraryRepository {
 
     public Author selectAuthorById(Long authorId) {
         try {
-            log.info("LibraryRepository/selectAuthorById id = {}", authorId);
+            log.info("LibraryRepository/selectAuthorById .. id = {}", authorId);
             return dsl.selectFrom(AUTHORS)
                     .where(AUTHORS.ID.eq(authorId))
                     .fetchOneInto(Author.class);
         } catch (Exception e) {
-            log.error("LibraryRepository/selectAuthorById error {}", e);
+            log.error("LibraryRepository/selectAuthorById error", e);
             return null;
         }
     }
 
-    public Author selectAuthorByLastName(String lastName) {
+    public List<Author> selectAuthorByLastName(String lastName) {
         try {
+            log.info("LibraryRepository/selectAuthorByLastName .. lastName = {}", lastName);
+
             return dsl.selectFrom(AUTHORS)
                     .where(AUTHORS.LAST_NAME.eq(lastName))
-                    .fetchOneInto(Author.class);
+                    .fetchInto(Author.class);
         } catch (Exception e) {
-            log.error("...... ERROR Repository : selectAuthorByLastName : ошибка при получении данных писателя из БД ");
+            log.error("LibraryRepository/selectAuthorByLastName error", e);
             return null;
         }
     }
 
     public Long countAuthors() {
-        try {
+         try {
             log.info("LibraryRepository/countAuthors");
             return dsl.selectCount()
                     .from(AUTHORS)
                     .fetchOneInto(Long.class);
         } catch (Exception e) {
-            log.error("LibraryRepository/countAuthors error {}", e);
-            return null;
-        }
-    }
-
-    public Book selectBookByTitle(String title) {
-        try {
-            log.info("LibraryRepository/selectBookByTitle");
-
-            return dsl.selectFrom(BOOKS)
-                    .where(BOOKS.TITLE.eq(title))
-                    .fetchOneInto(Book.class);
-        } catch (Exception e) {
-            log.error("LibraryRepository/selectBookByTitle error {}", e);
-            return null;
-        }
-    }
-
-    public Book selectBookById(Long id) {
-        try {
-            log.info("LibraryRepository/selectBookById");
-
-            return dsl.selectFrom(BOOKS)
-                    .where(BOOKS.ID.eq(id))
-                    .fetchOneInto(Book.class);
-        } catch (Exception e) {
-            log.error("LibraryRepository/selectBookById error {}", e);
+            log.error("LibraryRepository/countAuthors error", e);
             return null;
         }
     }
@@ -155,6 +136,8 @@ public class LibraryRepository {
     @Transactional
     public Book insertBook(Author author, String title) {
         try {
+            log.info("LibraryRepository/insertBook .. Author id = {}, Author name = {}, title = {}", author.getId(), author.getLastName(), title);
+
             Long bookId = dsl.insertInto(BOOKS)
                     .set(BOOKS.TITLE, title)
                     .returning(BOOKS.ID)
@@ -167,7 +150,7 @@ public class LibraryRepository {
 
             return selectBookById(bookId);
         } catch (Exception e) {
-            log.error("...... ERROR Repository : insertBook : ошибка сохранения Книги в БД ");
+            log.error("LibraryRepository/insertBook error", e);
             return null;
         }
     }
@@ -175,7 +158,7 @@ public class LibraryRepository {
     @Transactional
     public Long deleteBook(Long bookId) {
         try {
-            log.info("LibraryRepository/deleteBook id = {}", bookId);
+            log.info("LibraryRepository/deleteBook .. id = {}", bookId);
 
             dsl.deleteFrom(AUTHORS_BOOKS)
                     .where(AUTHORS_BOOKS.BOOK_ID.eq(bookId))
@@ -197,18 +180,45 @@ public class LibraryRepository {
         }
     }
 
+    public List<Book> selectBookByTitle(String title) {
+        try {
+            log.info("LibraryRepository/selectBookByTitle .. title = {}", title);
+
+            return dsl.selectFrom(BOOKS)
+                    .where(BOOKS.TITLE.eq(title))
+                    .fetchInto(Book.class);
+        } catch (Exception e) {
+            log.error("LibraryRepository/selectBookByTitle error", e);
+            return null;
+        }
+    }
+
+    public Book selectBookById(Long id) {
+        try {
+            log.info("LibraryRepository/selectBookById .. id = {}", id);
+
+            return dsl.selectFrom(BOOKS)
+                    .where(BOOKS.ID.eq(id))
+                    .fetchOneInto(Book.class);
+        } catch (Exception e) {
+            log.error("LibraryRepository/selectBookById error", e);
+            return null;
+        }
+    }
+
     public List<Book> selectBooksByAuthor(Author author) {
         try {
+            log.info("LibraryRepository/selectBooksByAuthor .. Author id = {}, last name = {}", author.getId(), author.getLastName());
             return dsl.select(BOOKS.ID,
                               BOOKS.TITLE)
                          .from(BOOKS)
                          .leftJoin(AuthorsBooks.AUTHORS_BOOKS).on(AuthorsBooks.AUTHORS_BOOKS.BOOK_ID.eq(BOOKS.ID))
                          .leftJoin(AUTHORS).on(AUTHORS.ID.eq(AuthorsBooks.AUTHORS_BOOKS.AUTHOR_ID))
-                         .where(AUTHORS.LAST_NAME.eq(author.getLastName()))
+                         .where(AUTHORS.ID.eq(author.getId()))
                          .orderBy(BOOKS.ID)
                          .fetchInto(Book.class);
         } catch (Exception e) {
-            log.error("...... ERROR Repository : selectBooksByAuthor : ошибка при получении списка книг из БД ");
+            log.error("LibraryRepository/selectBooksByAuthor error", e);
             return null;
         }
     }
@@ -220,7 +230,7 @@ public class LibraryRepository {
                     .from(BOOKS)
                     .fetchOneInto(Long.class);
         } catch (Exception e) {
-            log.error("LibraryRepository/countBooks error {}", e);
+            log.error("LibraryRepository/countBooks error", e);
             return null;
         }
     }

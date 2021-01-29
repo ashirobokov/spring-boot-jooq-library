@@ -14,21 +14,21 @@ public interface LibraryService {
 
     public List<Author> findAllAuthors();
 
-    public Author findAuthorByLastName(String lastName);
+    public List<Author> findAuthorByLastName(String lastName);
 
     public Author findAuthorById(Long id);
 
     public Long countAuthors();
 
-    public Book saveBook(String authorName, String title);
+    public Book saveBook(Long authorId, String title);
 
     public Long removeBook(Long id);
 
-    public Book findBookByTitle(String title);
+    public List<Book> findBookByTitle(String title);
 
     public Book findBookById(Long id);
 
-    public AuthorBookList findBooksByAuthor(String lastName);
+    public AuthorBookList findBooksByAuthor(Long authorId);
 
     public Long countBooks();
 

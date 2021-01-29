@@ -8,6 +8,7 @@ import lombok.*;
 @Getter
 @ToString
 public class AuthorBook {
+    Long authorId;
     String authorName;
     String bookTitle;
 }

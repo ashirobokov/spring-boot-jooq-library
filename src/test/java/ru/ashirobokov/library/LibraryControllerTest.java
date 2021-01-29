@@ -1,13 +1,10 @@
 package ru.ashirobokov.library;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -18,8 +15,10 @@ import org.testng.annotations.Test;
 import ru.ashirobokov.library.model.Author;
 import ru.ashirobokov.library.model.Book;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.ashirobokov.library.utils.TestUtils.objectToJson;
 
 @SpringBootTest
@@ -53,19 +52,19 @@ public class LibraryControllerTest extends AbstractTransactionalTestNGSpringCont
     public void testHome() throws Exception {
         logger.info("LibraryControllerTest/testHome started ... ");
 
-        mockMvc.perform(get(appBasicUrl +"test2")
+        mockMvc.perform(get(appBasicUrl + "test2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value("test2, test2!")
-        );
+                );
     }
 
     @Test(enabled = true)
     public void testHome2() throws Exception {
         logger.info("LibraryControllerTest/testHome2 started ... ");
 
-        ResultActions result = mockMvc.perform(get(appBasicUrl +"test2")
+        ResultActions result = mockMvc.perform(get(appBasicUrl + "test2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
 
@@ -82,7 +81,7 @@ public class LibraryControllerTest extends AbstractTransactionalTestNGSpringCont
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .content(objectToJson(testAuthor1)))
-    //        .header("Authorization", getBasicAuthHeader("John", "secr3t")))
+                    //        .header("Authorization", getBasicAuthHeader("John", "secr3t")))
                     .andExpect(status().isOk());
 
         } catch (Exception e) {

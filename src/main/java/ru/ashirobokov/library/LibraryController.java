@@ -36,14 +36,18 @@ public class LibraryController {
 
     @RequestMapping(value = "authors", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response createAuthor(@RequestBody Author author) {
-        log.info("LibraryController/createAuthor .. {}", author);
+        log.info("LibraryController/createAuthor .. Author {} {}", author.getFirstName(), author.getLastName());
         Response response = new Response();
 
         Author savedAuthor = libraryService.saveAuthor(author);
         if (null != savedAuthor) {
             response.setData(savedAuthor);
         } else {
-            response.setError("Error : Ошибка при попытке внести данные писателя " + author + " в БД");
+            response.setError("Error : Ошибка при попытке внести данные писателя "
+                    + author.getFirstName()
+                    + " "
+                    + author.getLastName()
+                    + " в БД");
         }
 
         return response;
@@ -51,7 +55,7 @@ public class LibraryController {
 
     @RequestMapping(value = "author/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response removeAuthor(@PathVariable("id") Long id) {
-        log.info("LibraryController/removeAuthor id = {}", id);
+        log.info("LibraryController/removeAuthor .. id = {}", id);
         Response response = new Response();
 
         Long authorId = libraryService.removeAuthor(id);
@@ -68,6 +72,7 @@ public class LibraryController {
       public Response getAllAuthors() {
         log.info("LibraryController/getAllAuthors");
         Response response = new Response();
+
         List<Author> authors = libraryService.findAllAuthors();
         if (null != authors) {
             response.setData(authors);
@@ -93,14 +98,14 @@ public class LibraryController {
         return response;
     }
 
-    @RequestMapping(value = "/author/{last_name}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response findAuthorByLastName(@PathVariable("last_name") String lastName) {
-        log.info("LibraryController/findAuthorByLastName .. last name = {}", lastName);
+    @RequestMapping(value = "/author/last_name/{last_name}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response getAuthorByLastName(@PathVariable("last_name") String lastName) {
+        log.info("LibraryController/getAuthorByLastName .. last name = {}", lastName);
         Response response = new Response();
 
-        Author returnedAuthor = libraryService.findAuthorByLastName(lastName);
-        if (null != returnedAuthor) {
-            response.setData(returnedAuthor);
+        List<Author> authors = libraryService.findAuthorByLastName(lastName);
+        if (null != authors) {
+            response.setData(authors);
         } else {
             response.setError("Error : Ошибка при поиске данных писателя '" + lastName + "' в БД");
         }
@@ -108,9 +113,9 @@ public class LibraryController {
         return response;
     }
 
-    @RequestMapping(value = "/author/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response findAuthorById(@PathVariable("id") Long authorId) {
-        log.info("LibraryController/findAuthorById .. id = {}", authorId);
+    @RequestMapping(value = "/author/id/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response getAuthorById(@PathVariable("id") Long authorId) {
+        log.info("LibraryController/getAuthorById .. id = {}", authorId);
         Response response = new Response();
 
         Author returnedAuthor = libraryService.findAuthorById(authorId);
@@ -124,16 +129,19 @@ public class LibraryController {
     }
 
     @RequestMapping(value = "book", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response addBook(@RequestBody AuthorBook authorNameBookTitle) {
-        log.info("LibraryController/addBook title = {}", authorNameBookTitle);
+    public Response addBook(@RequestBody AuthorBook authorBook) {
+        log.info("LibraryController/addBook .. Author id = {}, name = {}, title = {}",
+                                                                    authorBook.getAuthorId(),
+                                                                    authorBook.getAuthorName(),
+                                                                    authorBook.getBookTitle());
         Response response = new Response();
 
-        Book savedBook = libraryService.saveBook(authorNameBookTitle.getAuthorName(), authorNameBookTitle.getBookTitle());
+        Book savedBook = libraryService.saveBook(authorBook.getAuthorId(), authorBook.getBookTitle());
 
         if (null != savedBook) {
             response.setData(savedBook);
         } else {
-            response.setError("Error : Ошибка сохранения книги '" + authorNameBookTitle.getBookTitle() + "' в БД библиотеки");
+            response.setError("Error : Ошибка сохранения книги '" + authorBook.getBookTitle() + "' в БД библиотеки");
         }
 
         return response;
@@ -153,7 +161,7 @@ public class LibraryController {
         if (bookId >= 0) {
             response.setData(bookId);
         } else {
-            response.setError("Error : Ошибка при попытке удалить книгу id = " + id + " из БД");
+            response.setError("Error : Ошибка при попытке удалить книгу с id = " + id + " из БД");
         }
 
         return response;
@@ -165,14 +173,14 @@ public class LibraryController {
      * @param title
      * @return Response object
      */
-    @RequestMapping(value = "/book/{title}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/book/title/{title}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response findBookByTitle(@PathVariable("title") String title) {
-        log.info("LibraryController/findBooksByTitle .. title \"{}\"", title);
+        log.info("LibraryController/findBooksByTitle .. title = {}", title);
         Response response = new Response();
 
-        Book returnedBook = libraryService.findBookByTitle(title);
-        if (null != returnedBook) {
-            response.setData(returnedBook);
+        List<Book> books = libraryService.findBookByTitle(title);
+        if (null != books) {
+            response.setData(books);
         } else {
             response.setError("Error : Ошибка поиска книги с названием '" + title + "' в БД ");
         }
@@ -180,7 +188,7 @@ public class LibraryController {
         return response;
     }
 
-    @RequestMapping(value = "/book/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/book/id/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response findBookById(@PathVariable("id") Long id) {
         log.info("LibraryController/findBooksById .. id = {}", id);
         Response response = new Response();
@@ -195,16 +203,16 @@ public class LibraryController {
         return response;
     }
 
-    @RequestMapping(value = "/books/{last_name}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response findBooksByAuthor(@PathVariable("last_name") String lastName) {
-        log.info(".... LibraryController.findBooksByAuthor .. {}", lastName);
+    @RequestMapping(value = "/books/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response findBooksByAuthor(@PathVariable("id") Long authorId) {
+        log.info("LibraryController/findBooksByAuthor .. id = {}", authorId);
         Response response = new Response();
 
-        AuthorBookList authorBookList = libraryService.findBooksByAuthor(lastName);
+        AuthorBookList authorBookList = libraryService.findBooksByAuthor(authorId);
         if (null != authorBookList) {
             response.setData(authorBookList);
         } else {
-            response.setError("Error : Ошибка при попытке получить список книг писателя '" + lastName + "' из БД ");
+            response.setError("Error : Ошибка при попытке получить список книг писателя id = " + authorId + " из БД ");
         }
 
         return response;
